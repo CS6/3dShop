@@ -1,0 +1,104 @@
+<html>
+
+<head>
+        <title>My first three.js app</title>
+        <style>
+                body {
+                        margin: 0;
+                }
+
+                canvas {
+                        width: 100%;
+                        height: 100%
+                }
+        </style>
+</head>
+
+<body>
+        <script src="js/three.js"></script>
+        <script>
+                var scene = new THREE.Scene();
+                var camera = new THREE.PerspectiveCamera(45,
+                        window.innerWidth / window.innerHeight, 1, 500);
+                camera.position.set(0, 0, 100);
+                camera.lookAt(0, 0, 0);
+                //有兩種渲染器：
+
+                // var renderer=new THREE.CanvasRenderer(); //幾何級別的渲染，兼容性更好
+
+                // var renderer=new THREE.WebGLRenderer(); //像素級的渲染，渲染效果更好
+
+
+                var renderer = new THREE.WebGLRenderer();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                document.body.appendChild(renderer.domElement);
+
+                // var geometry = new THREE.BoxGeometry(1, 1, 1);
+                //create a blue LineBasicMaterial
+                //对于线条来说，我们能使用的材质只有LineBasicMaterial 或者 LineDashedMaterial。
+                var material_blue = new THREE.LineBasicMaterial({ color: 0x0000ff });
+                var material_red = new THREE.LineBasicMaterial({ color: 0xff0000 });
+                var material_green = new THREE.LineBasicMaterial({ color: 0x00ff00 });
+
+                //定义好材质之后，我们需要一个带有一些顶点的Geometry 或者 BufferGeometry。 （推荐使用BufferGeometry，因为它在性能上表现得会更好一些；但在这里，为了简单起见，我们使用Geometry）：
+                var geometry = new THREE.Geometry();
+                var geometry_red = new THREE.Geometry();
+                var geometry_green = new THREE.Geometry();
+
+                geometry.vertices.push(new THREE.Vector3(0, 0, 0));
+                geometry.vertices.push(new THREE.Vector3(0, 10, 0));
+                geometry.vertices.push(new THREE.Vector3(0, 0, 10));
+
+
+                geometry_red.vertices.push(new THREE.Vector3(0, 10, 0));
+                geometry_red.vertices.push(new THREE.Vector3(0, 0, 0));
+                geometry_red.vertices.push(new THREE.Vector3(-10, 10, 0));
+                geometry_red.vertices.push(new THREE.Vector3(0, 10, 10));
+
+                geometry_red.vertices.push(new THREE.Vector3(-10, 10, 10));
+                geometry_red.vertices.push(new THREE.Vector3(-10, 0, 10));
+
+
+                geometry_green.vertices.push(new THREE.Vector3(0, 0, 0));
+                geometry_green.vertices.push(new THREE.Vector3(0, 0, 10));
+                geometry_green.vertices.push(new THREE.Vector3(0, 10, 0));
+                geometry_green.vertices.push(new THREE.Vector3(10, 0, 0));
+                geometry_green.vertices.push(new THREE.Vector3(0, 10, 10));
+                geometry_green.vertices.push(new THREE.Vector3(10, 10, 0));
+                geometry_green.vertices.push(new THREE.Vector3(10, 0, 10));
+                geometry_green.vertices.push(new THREE.Vector3(10, 10, 10));
+                geometry_green.vertices.push(new THREE.Vector3(0, 0, 0));
+
+
+
+                //  注意，线是画在每一对连续的顶点之间的，而不是在第一个顶点和最后一个顶点之间绘制线条（线条并未闭合）。既然我们已经有了能够画两条线的点和一个材质，那我们现在就可以将他们组合在一起，形成一条线。
+                var line = new THREE.Line(geometry, material_blue);
+                var line_red = new THREE.Line(geometry_red, material_red);
+                var line_green = new THREE.Line(geometry_green, material_green);
+
+
+
+                ///剩下的事情就是把它添加到场景中，并调用render（渲染）函数。
+                scene.add(line, line_red, line_green);
+                //three.js 渲染器更改背景色的幾種方法
+                renderer.setClearColor('rgb(135,206,250)', 1.0);
+                // renderer.setClearColor(0xffffff, 1.0);
+                // renderer.setClearColor('#428bca', 1.0);
+                // renderer.setClearColor('rgba(135,206,250,0.5)', 1.0);
+                renderer.render(scene, camera);
+
+                // var cube = new THREE.Mesh(geometry, material);
+                // scene.add(cube);
+                // var animate = function () {
+                //         requestAnimationFrame(animate);
+
+                //         cube.rotation.x += 0.01;
+                //         cube.rotation.y += 0.01;
+
+                //         renderer.render(scene, camera);
+                // };
+                //animate();
+        </script>
+</body>
+
+</html>
