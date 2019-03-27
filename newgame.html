@@ -1,0 +1,227 @@
+<html>
+
+
+<head>
+		<title>示例 02.04 - 網格物件屬性</title>
+		<script src="js/three.js"></script>
+		<script type="text/javascript" src="js/libs/dat.gui.min.js"></script>
+		<script src="js/controls/OrbitControls.js"></script>
+		<script src="js/libs/stats.min.js"></script>
+
+
+		<script src="js/ParametricGeometries.js"></script>
+		    <script src="js/QuickHull.js"></script>
+		    <script src="js/geometries/ConvexGeometry.js"></script>
+		    <script src="js/jquery-3.3.1.min.js"></script>
+		<style>
+		    body {
+			/* 設定 margin 為 0，並且 overflow 為 hidden，來完成頁面樣式 */
+			margin: 0;
+			overflow: hidden;
+		    }
+			    /* 統計物件樣式 */
+			    #Stats-output {
+				    position: absolute;
+				    left: 0px;
+				    top: 0px;
+			    }
+		</style>
+	    </head>
+	    <body>
+<body>
+	<!-- <script src="js/three.js"></script>
+	<script type="text/javascript" src="js/libs/dat.gui.min.js"></script>
+	<div id="info">Description</div> -->
+
+	
+<!-- 用於 WebGL 輸出的 Div -->
+<div id="WebGL-output"></div>
+<!-- 用於統計 FPS 輸出的 Div -->
+<div id="Stats-output"></div>
+
+<!-- 執行 Three.js 示例的 Javascript 程式碼 -->
+<script type="text/javascript">
+
+	var scene;
+	var camera;
+	var render;
+	var controls;
+	var stats;
+	
+	var guiParams;
+	var gui;
+	
+	var plane;
+	var mesh;
+
+    // 當所有元素載入完畢後，就執行我們 Three.js 相關的東西
+    $(function() {
+		stats = initStats();
+		
+		scene = new THREE.Scene();
+		camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000); // 2147483647
+		camera.position.set(-20, 25, 20);
+		render = new THREE.WebGLRenderer( {antialias: true} ); // antialias 抗鋸齒
+		render.setSize(window.innerWidth, window.innerHeight);
+		render.setClearColor(0xEEEEEE);
+		render.shadowMap.enabled = true; // 允許陰影投射
+		$('#WebGL-output')[0].appendChild(render.domElement);
+		window.addEventListener('resize', onWindowResize, false);
+		var target = new THREE.Vector3(5, 0, 0);
+		controls = new THREE.OrbitControls(camera, render.domElement);
+		controls.target = target; // 解決 camera.lookAt(x, y, z) 失效問題
+		camera.lookAt(target);
+		
+		scene.add(new THREE.AxisHelper(20));// 加入座標軸
+		
+		// 加入一個平面
+		var planeGeometry = new THREE.PlaneGeometry(60, 40, 1, 1);
+		var planeMaterial = new THREE.MeshLambertMaterial( {color: 0xFFFFFF} );
+		plane = new THREE.Mesh(planeGeometry, planeMaterial);
+		plane.rotation.x = -0.5 * Math.PI; // 沿著 X軸旋轉-90°
+		plane.position.x = 0;
+		plane.position.y = 0;
+		plane.position.z = 0;
+		plane.receiveShadow = true; // 幾何平面接收陰影
+		scene.add(plane);
+		
+		// 加入一個環境光源
+		var ambientLight = new THREE.AmbientLight(0x090909);
+		scene.add(ambientLight);
+		
+		// 加入一個聚光燈光源
+		// 注：基礎材質 MeshBasicMaterial 不會對光源產生反應，因此要改用 MeshLambertMaterial 或 MeshPhongMaterial 材質才有效果
+		var spotLight = new THREE.SpotLight( 0xFFFFFF);
+		spotLight.position.set(-40, 40, 50);
+		spotLight.castShadow = true; // 光源產生陰影
+		spotLight.shadow.mapSize.width = 1024; // 必須是 2的冪，預設值為 512
+		spotLight.shadow.mapSize.height = 1024; // 必須是 2的冪，預設值為 512
+		scene.add(spotLight);
+		
+		// 定義 gui 控制引數
+		guiParams = new function() {
+			function addControlPoint(x, y, z) {
+				var controlPoint = new function() {
+					this.x = x;
+					this.y = y;
+					this.z = z;
+				};
+				return controlPoint;
+			}
+			
+			this.scale = addControlPoint(1, 1, 1);
+			this.position = addControlPoint(0, 4, 0);
+			this.rotation = addControlPoint(1, 1, 1);
+			this.translation = addControlPoint(0, 0, 0);
+			this.scale_card = addControlPoint(1, 1, 1);
+			this.position_card = addControlPoint(0, 4, 0);
+			this.rotation_card = addControlPoint(1, 1, 1);
+			this.translate_card = addControlPoint(0, 0, 0);
+			this.visible = true;
+		}
+		
+		// 定義 gui 並繫結引數
+		gui = new dat.GUI();
+		var folder_card = gui.addFolder('scale_card');
+		folder_card.add(guiParams.scale_card, 'x', 0, 5);
+		folder_card.add(guiParams.scale_card, 'y', 0, 5);
+		folder_card.add(guiParams.scale_card, 'z', 0, 5);
+		folder_card = gui.addFolder('position_card');
+		folder_card.add(guiParams.position_card, 'x', -10, 10);
+		folder_card.add(guiParams.position_card, 'y', -4, 20);
+		folder_card.add(guiParams.position_card, 'z', -10, 10);
+		folder_card = gui.addFolder('rotation_card');
+		folder_card.add(guiParams.rotation_card, 'x', -4, 4);
+		folder_card.add(guiParams.rotation_card, 'y', -4, 4);
+		folder_card.add(guiParams.rotation_card, 'z', -4, 4);
+		folder_card = gui.addFolder('translate_card');
+		folder_card.add(guiParams.translate_card, 'x', -10, 10);
+		folder_card.add(guiParams.translate_card, 'y', -10, 10);
+		folder_card.add(guiParams.translate_card, 'z', -10, 10);
+		
+
+		var folder = gui.addFolder('scale');
+		folder.add(guiParams.scale, 'x', 0, 5);
+		folder.add(guiParams.scale, 'y', 0, 5);
+		folder.add(guiParams.scale, 'z', 0, 5);
+		folder = gui.addFolder('position');
+		folder.add(guiParams.position, 'x', -10, 10);
+		folder.add(guiParams.position, 'y', -4, 20);
+		folder.add(guiParams.position, 'z', -10, 10);
+		folder = gui.addFolder('rotation');
+		folder.add(guiParams.rotation, 'x', -4, 4);
+		folder.add(guiParams.rotation, 'y', -4, 4);
+		folder.add(guiParams.rotation, 'z', -4, 4);
+		folder = gui.addFolder('translate');
+		folder.add(guiParams.translation, 'x', -10, 10);
+		folder.add(guiParams.translation, 'y', -10, 10);
+		folder.add(guiParams.translation, 'z', -10, 10);
+		
+		gui.add(guiParams, 'visible');
+		
+		var material = new THREE.MeshLambertMaterial({color: 0x44ff44});
+        var geom = new THREE.BoxGeometry(5, 8, 3);
+        mesh = new THREE.Mesh(geom, material);
+        mesh.position.y = 4;
+        mesh.castShadow = true;
+        scene.add(mesh);
+		
+
+	var geom = new THREE.BoxGeometry(3,3,3);
+        card = new THREE.Mesh(geom, material);
+        card.position.x = -2;
+        card.castShadow = true;
+        scene.add(card);
+	renderScene();
+    });
+	
+	/** 初始化 stats 統計物件 */
+	function initStats() {
+		stats = new Stats();
+		stats.setMode(0); // 0 為監測 FPS；1 為監測渲染時間
+		$('#Stats-output').append(stats.domElement);
+		return stats;
+	}
+	
+	/** 渲染場景 */
+	function renderScene() {
+		stats.update();
+		updateMesh(); // 更新物體
+		updateCards();
+		requestAnimationFrame(renderScene);
+		render.render(scene, camera);
+	}
+	
+	/** 當瀏覽器視窗大小變化時觸發 */
+	function onWindowResize() {
+		camera.aspect = window.innerWidth / window.innerHeight;
+		camera.updateProjectionMatrix();
+		render.setSize(window.innerWidth, window.innerHeight);
+	}
+	
+	/** 更新物體 */
+	function updateMesh() {
+		mesh.visible = guiParams.visible;
+		mesh.scale.set(guiParams.scale.x, guiParams.scale.y, guiParams.scale.z);
+		mesh.position.set(guiParams.position.x, guiParams.position.y, guiParams.position.z);
+		mesh.rotation.set(guiParams.rotation.x, guiParams.rotation.y, guiParams.rotation.z);
+		mesh.translateX(guiParams.translation.x);
+		mesh.translateY(guiParams.translation.y);
+		mesh.translateZ(guiParams.translation.z);
+		
+	}
+	function updateCards() {
+		card.visible = guiParams.visible;
+		// card.scale.set(guiParams.scale.x, guiParams.scale.y, guiParams.scale.z);
+		card.position.set(guiParams.position_card.x+1, guiParams.position_card.y+1, guiParams.position_card.z+1);
+		card.rotation.set(guiParams.rotation_card.x+1, guiParams.rotation_card.y+1, guiParams.rotation_card.z+1);
+		// card.translateX(guiParams.translation.x);
+		// card.translateY(guiParams.translation.y);
+		// card.translateZ(guiParams.translation.z);
+		
+	}
+
+</script>
+</body>
+
+</html>
