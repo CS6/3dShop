@@ -17,12 +17,20 @@
 
 <body>
 	<script src="js/three.js"></script>
+	<script type="text/javascript" src="js/libs/dat.gui.min.js"></script>
 	<div id="info">Description</div>
 
 	<script>
-
-
+		// var controls = new function () {
+		// this.rotationSpeed = 0.02;
+		// //......
+		// };
+		// var gui = new dat.GUI();
+		// gui.add(controls, 'rotationSpeed', 0, 0.5);
 		// 定義角度
+
+		
+
 		var theta = 0;
 		// 初始化鼠標X方向移動值
 		var mouseX = 0;
@@ -44,6 +52,7 @@
 		// camera.lookAt(new THREE.Vector3(0, 0, 1));
 		// 定義著色器
 		var renderer = new THREE.WebGLRenderer()
+		renderer.setClearColor(0xEEEEEE,1.0);
 		renderer.setSize(window.innerWidth, window.innerHeight)
 		document.body.appendChild(renderer.domElement)
 		// 告訴渲染器渲染陰影
@@ -59,7 +68,27 @@
 			scene.add(floor)
 			return floor
 		}
+		var size = 10;
+var divisions = 10;
+
+// GridHelper
+// 坐标格辅助对象. 坐标格实际上是2维线数组.
+var gridHelper = new THREE.GridHelper(2000, 100);
+// gridHelper.position.x = 0;
+gridHelper.position.set(0, 0, -200);
+
+gridHelper.rotation.x = Math.PI / 2;
+
+gridHelper.material.opacity = 0.25;
+gridHelper.material.transparent = true;
+			scene.add(gridHelper);
+
+
 		var floor = initFloor()
+		///ＸＹＺ輔助線
+		var axes = new THREE.AxesHelper(20);
+        	scene.add(axes);
+
 		// 添加物體
 		//对于线条来说，我们能使用的材质只有LineBasicMaterial 或者 LineDashedMaterial。
 		var material_blue = new THREE.LineBasicMaterial({ color: 0x0000ff });
