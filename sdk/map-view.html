@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>map-gen</title>
+    <?xml version="1.0" encoding="utf-8"?>
+    <svg xmlns="http://www.w3.org/2000/svg">
+        <circle cx="50" cy="50" r="20" /></svg>
+<style>
+        .img-container {
+            position: relative;
+        }
+
+        .img-container * {
+            position: absolute;
+        }
+</style>
+</head>
+
+<body>
+    <header>
+        <input type="file">
+        <div id="load" class="btn">LOAD</div>
+              let loadBtn = document.getElementById("load");
+
+    </header>
+
+    <content>
+        <div class="img-container" >
+            <img  src="../img/L2re.svg">
+            <svg width="500" height="310"><circle cx="195" cy="110" r="1" fill="#000"></circle><circle cx="220" cy="116" r="1" fill="#000"></circle><path d="M 195 110 L 220 116" stroke="#000"></path><circle cx="350" cy="200" r="1" fill="#000"></circle><path d="M 220 116 L 350 200" stroke="#000"></path><circle cx="350" cy="208" r="1" fill="#000"></circle><path d="M 350 200 L 350 208" stroke="#000"></path><circle cx="322" cy="212" r="1" fill="#000"></circle><path d="M 350 208 L 322 212" stroke="#000"></path><circle cx="321" cy="207" r="1" fill="#000"></circle><path d="M 322 212 L 321 207" stroke="#000"></path><circle cx="201" cy="205" r="1" fill="#000"></circle><path d="M 321 207 L 201 205" stroke="#000"></path><circle cx="190" cy="198" r="1" fill="#000"></circle><path d="M 201 205 L 190 198" stroke="#000"></path><circle cx="193" cy="124" r="1" fill="#000"></circle><path d="M 190 198 L 193 124" stroke="#000"></path><circle cx="197" cy="114" r="1" fill="#000"></circle><path d="M 193 124 L 197 114" stroke="#000"></path></svg>
+            <!-- <img  src="../img/L2re.svg" usemap="#map-name" style="opacity: 0">
+            <map name="map-name">
+                <area shape="polygon" coords="" id="fghjk">
+                <area shape="polygon" coords="250,51,274,60,330,80,331,130,248,123,249,52" id="vbnm">
+            </map> -->
+
+
+           <img  src="../img/L2re.svg" usemap="#map-name" style="opacity: 0">
+            <map name="map-name">
+                <area shape="polygon" coords="195,110,220,116,350,200,350,208,322,212,321,207,201,205,190,198,193,124,197,114" id="vbnm">
+            </map>
+
+            
+        </div>
+        <script>
+        let loadFile = document.querySelector("[type=file]");
+        let loadBtn = document.getElementById("load");
+        let imgContainer = document.getElementById("img-container");
+        let img = document.querySelector("#img-container img");
+        let svg = document.querySelector("#img-container svg");
+        let fileReader = new FileReader();
+        let map = [];
+        let area = [];
+        loadFile.addEventListener("change", function (e) {
+            fileReader.addEventListener("load", function () {
+                img.src = fileReader.result;
+            });
+            fileReader.readAsDataURL(this.files[0]);
+        });
+
+        loadBtn.addEventListener("click", e => loadFile.click());
+
+
+            document.querySelector("map #vbnm").onclick = function() {
+                console.log("done");
+            }
+        </script>
+        
+    </content>
+
+</body>
+
+</html>
+
+<!-- [{"id":"asdfg","coords":"315,81,348,109,349,155,321,87,332,94,325,108,341,119,326,148,326,148,323,147,323,147,323,149,244,99,217,80,216,69,235,68,236,44,254,44,314,72,371,79"}] -->

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>map-gen</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: monospace;
+        }
+
+        body {
+            margin: 0px;
+            width: 100vw;
+            height: 100vh;
+            background-color: #222;
+        }
+
+        header {
+            background-color: #444;
+            height: 60px;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+        }
+
+        header input {
+            display: none;
+        }
+
+        .btn {
+            color: #eee;
+            width: 100px;
+            height: 50px;
+            border: 5px solid;
+            border-radius: 5px;
+            font-size: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.5s;
+            margin-left: 5px;
+        }
+
+        .btn:active {
+            transform: scale(0.8);
+        }
+
+        content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: calc(100vh - 60px);
+        }
+
+        #img-container {
+            position: relative;
+        }
+
+        #img-container * {
+            position: absolute;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <input type="file">
+        <div id="clr" class="btn">CLR</div>
+        <div id="load" class="btn">LOAD</div>
+        <div id="next" class="btn">NEXT</div>
+        <div id="copy" class="btn">COPY</div>
+        <div id="json" class="btn">JSON</div>
+    </header>
+    <content>
+        <div id="img-container"><img><svg></svg></div>
+    </content>
+    <script>
+        let loadFile = document.querySelector("[type=file]");
+        let loadBtn = document.getElementById("load");
+        let nextBtn = document.getElementById("next");
+        let copyBtn = document.getElementById("copy");
+        let jsonBtn = document.getElementById("json");
+        let clrBtn = document.getElementById("clr");
+        let imgContainer = document.getElementById("img-container");
+        let img = document.querySelector("#img-container img");
+        let svg = document.querySelector("#img-container svg");
+        let fileReader = new FileReader();
+        let map = [];
+        let area = [];
+        loadBtn.addEventListener("click", e => loadFile.click());
+
+        clrBtn.addEventListener("click", e => {
+            map = [];
+            area = [];
+            while (svg.childNodes.length) svg.removeChild(svg.childNodes[0]);
+        });
+
+        nextBtn.addEventListener("click", function (e) {
+            map.push([prompt("輸入說明"), area.join(",")]);
+            // while (svg.childNodes.length) svg.removeChild(svg.childNodes[0]);
+        });
+
+        copyBtn.addEventListener("click", function (e) {
+            prompt("複製", "<img src=\"" + loadFile.files[0].name + "\" usemap=\"map-name\">\n<map name=\"map-name\">\n" + map.map(
+                ([id, coords]) => (
+                    `    <area shape=\"polygon\" coords=\"${coords}\" id=\"${id}\">`
+                )
+            ).join("\n") + "\n</map>");
+        });
+
+        jsonBtn.addEventListener("click", function (e) {
+            prompt("複製", JSON.stringify(map.map(
+                ([id, coords]) => ({ id, coords })
+            )));
+        });
+        
+        img.addEventListener("load", function (e) {
+            imgContainer.style.width = img.width + "px";
+            imgContainer.style.height = img.height + "px";
+            svg.setAttribute("width", img.width);
+            svg.setAttribute("height", img.height);
+        });
+
+        loadFile.addEventListener("change", function (e) {
+            fileReader.addEventListener("load", function () {
+                img.src = fileReader.result;
+            });
+            fileReader.readAsDataURL(this.files[0]);
+        });
+
+        function createDot(x, y) {
+            let cir = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            cir.setAttribute("cx", x);
+            cir.setAttribute("cy", y);
+            cir.setAttribute("r", 3);
+            cir.setAttribute("fill", "#f00");
+            return cir;
+        }
+
+        function createLine(x, y, nx, ny) {
+            let path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            path.setAttribute("d",`M ${x} ${y} L ${nx} ${ny}`);
+            
+            path.setAttribute("stroke", "#f00");
+            path.setAttribute("stroke-width", "3px");
+
+            return path;
+        }
+
+        imgContainer.addEventListener("click", function (e) {
+            let { offsetX: x, offsetY: y } = e;
+            svg.appendChild(createDot(x, y));
+            
+            let last = area.length - 1;
+
+            if (area[last]) {
+                svg.appendChild(createLine(...area[last], x, y));
+            }
+
+            area.push([x, y]);
+        });
+    </script>
+</body>
+
+</html>
